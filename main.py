@@ -51,7 +51,7 @@ def snipe():
     chrome_options.binary_location = "/usr/bin/google-chrome"
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome("./chromedriver", options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager.install(), options=chrome_options)
     driver.get(url)
 
     purchase_button = WebDriverWait(driver, 5).until(
