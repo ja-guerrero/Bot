@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from twilio.rest import Client
 from selenium.webdriver.chrome.options import Options
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
