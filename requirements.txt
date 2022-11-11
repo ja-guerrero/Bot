@@ -1,3 +1,0 @@
-python-dotenv==0.21.0
-selenium==3.141.0
-twilio==7.15.2
