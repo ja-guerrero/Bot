@@ -15,6 +15,15 @@ auth_token = os.getenv('TWILIO_AUTH_TOKEN')
 url = "https://shop.flipperzero.one/collections/all/products/flipper-zero"
 
 
+def goToLink(driver):
+    try:
+        driver.get(url)
+        purchase_button = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]')))
+        return (purchase_button)
+    except Exception as e:
+        goToLink(driver)
+
 def test_message():
     client = Client(account_sid, auth_token)
     message = client.messages \
@@ -39,9 +48,10 @@ def main_message():
 
 def snipe():
     chrome_options = Options()
+    chrome_options.binary_location = "/usr/bin/google-chrome"
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
     driver = webdriver.Chrome("./chromedriver", options=chrome_options)
-    test_message()
     driver.get(url)
 
     purchase_button = WebDriverWait(driver, 5).until(
@@ -50,14 +60,19 @@ def snipe():
 
     while purchase_button.text == "SOLD OUT":
         driver.refresh()
-        purchase_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]')))
+        try:
+            purchase_button = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]')))
+        except Exception as e:
+            print(e)
+        purchase_button = goToLink(driver)
         if purchase_button.text != "SOLD OUT":
             main_message()
             break
-    if purchase_button.text != "SOLD OUT":
-        main_message()
+        if purchase_button.text != "SOLD OUT":
+            main_message()
 
 
 if __name__ == "__main__":
     snipe()
+from webdriver_manager.chrome import ChromeDriverManager
