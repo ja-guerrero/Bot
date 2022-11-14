@@ -1,36 +1,26 @@
+from bs4 import BeautifulSoup
+import requests
 import os
 from dotenv import load_dotenv
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from twilio.rest import Client
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
 auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"}
+
 url = "https://shop.flipperzero.one/collections/all/products/flipper-zero"
 
-
-def goToLink(driver):
-    try:
-        driver.get(url)
-        purchase_button = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]')))
-        return (purchase_button)
-    except Exception as e:
-        goToLink(driver)
 
 def test_message():
     client = Client(account_sid, auth_token)
     message = client.messages \
         .create(
-            body='Hello there from Twilio SMS API',
-            from_=+#TWillio Phone Number,
-            to=+#Number
+            body='Your Bot is Listening!',
+            from_=+18438944352,
+            to=+16463150805
         )
     print(message.sid)
 
@@ -40,39 +30,27 @@ def main_message():
     message = client.messages \
         .create(
             body=f'FLIPPER ZERO IN STOCK! Please BUY NOW: {url}',
-            from_=+#TWillio Phone Number,
-            to=+#Number
+            from_=+18438944352,
+            to=+16463150805
         )
     print(message.sid)
 
 
-def snipe():
-    chrome_options = Options()
-    chrome_options.binary_location = "/usr/bin/google-chrome"
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(ChromeDriverManager.install(), options=chrome_options)
-    driver.get(url)
+def getPage():
+    page = requests.get(url, headers=HEADERS)
+    soup = BeautifulSoup(page.content, "html.parser")
+    button = soup.find('button', class_='product-form__cart-submit')
+    return button
 
-    purchase_button = WebDriverWait(driver, 5).until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]'))
-    )
 
-    while purchase_button.text == "SOLD OUT":
-        driver.refresh()
-        try:
-            purchase_button = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.XPATH, '//*[@id="addToCartCopy"]')))
-        except Exception as e:
-            print(e)
-        purchase_button = goToLink(driver)
-        if purchase_button.text != "SOLD OUT":
-            main_message()
-            break
-        if purchase_button.text != "SOLD OUT":
-            main_message()
+def refresh(button):
+    if button.text.strip() == "Sold out":
+        print(button.text.strip())
+        refresh(getPage())
+    else:
+        main_message()
 
 
 if __name__ == "__main__":
-    snipe()
-
+    test_message()
+    refresh(getPage())
