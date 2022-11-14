@@ -3,6 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from twilio.rest import Client
+import time
 
 load_dotenv()
 account_sid = os.getenv('TWILIO_ACCOUNT_SID')
@@ -37,20 +38,30 @@ def main_message():
 
 
 def getPage():
-    page = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(page.content, "html.parser")
-    button = soup.find('button', class_='product-form__cart-submit')
-    return button
+    try:
+        page = requests.get(url, headers=HEADERS)
+        if page:
+            soup = BeautifulSoup(page.content, "html.parser")
+            button = soup.find('button', class_='product-form__cart-submit')
+            return button
+        else:
+            getPage()
+    except Exception as e:
+        print(e)
 
 
 def refresh(button):
     if button.text.strip() == "Sold out":
-        print(button.text.strip())
-        refresh(getPage())
+        while button.text.strip() == "Sold out":
+            try:
+                time.sleep(1)
+                button = getPage()
+            except Exception as e:
+                print(e)
     else:
         main_message()
 
 
 if __name__ == "__main__":
-    test_message()
+    # test_message()
     refresh(getPage())
