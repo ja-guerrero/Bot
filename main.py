@@ -29,8 +29,8 @@ def test_message():
     message = client.messages \
         .create(
             body='Hello there from Twilio SMS API',
-            from_=+18438944352,
-            to=+16463150805
+            from_=+#TWillio Phone Number,
+            to=+#Number
         )
     print(message.sid)
 
@@ -40,8 +40,8 @@ def main_message():
     message = client.messages \
         .create(
             body=f'FLIPPER ZERO IN STOCK! Please BUY NOW: {url}',
-            from_=+18438944352,
-            to=+16463150805
+            from_=+#TWillio Phone Number,
+            to=+#Number
         )
     print(message.sid)
 
@@ -75,4 +75,4 @@ def snipe():
 
 if __name__ == "__main__":
     snipe()
-from webdriver_manager.chrome import ChromeDriverManager
+
